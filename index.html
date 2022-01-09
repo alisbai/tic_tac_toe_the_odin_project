@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="style.css">
+    <title>TIC_TAC_TOE</title>
+</head>
+<body>
+    <title><h1>TIC-TAC-TOE</h1></title>
+    <main>
+        <section id="difficultySection">
+            <h2>Difficulty And Sign</h2>
+            <div class="difficultySigns wrapper">
+                <select id="difficulty">
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                    <option value="unbeatable">Unbeatable</option>
+                </select>
+                <div id="signs">
+                    <button id="X" class="selected greenColor">X</button>
+                    <button id="O">O</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="board">
+            <button data-mapping="0"></button>
+            <button data-mapping="1"></button>
+            <button data-mapping="2"></button>
+            <button data-mapping="3"></button>
+            <button data-mapping="4"></button>
+            <button data-mapping="5"></button>
+            <button data-mapping="6"></button>
+            <button data-mapping="7"></button>
+            <button data-mapping="8"></button>
+        </section>
+
+        <section>
+            <button id="restart">Restart</button>
+        </section>
+    </main>
+    <div class="modal">
+        <div class="modalContent">
+            <p>Please, enter your name</p>
+            <input type="text" id="nameInput">
+            <button id="enterName">Submit</button>
+        </div>
+    </div>
+</body>
+</html>
