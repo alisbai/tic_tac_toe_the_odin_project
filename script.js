@@ -14,8 +14,8 @@ const gameBoard = (function() {
         for(let i = 0 ; i < _board.length; i++) {
             let cell = _board[i];
           if(cell === undefined) {
-          emptyCells.push(i);
-          }
+              emptyCells.push(i);
+            }
         }
         return emptyCells;
     }
@@ -27,6 +27,30 @@ const gameBoard = (function() {
     return {setCell, getCell, getEmptyCells, isCellEmpty};
 }) ();
 
+let AIStrategies = (function() {
+    let level = 'easy';
+    function setLevel(difficulty) {
+        level = difficulty;
+    }
+    function getLevel() {
+        return level;
+    }
+    function easyPlay(){
+        let emptyCells = gameBoard.getEmptyCells();
+        let randomIndex = Math.floor(Math.random() * emptyCells.length);
+        let randomCell = emptyCells[randomIndex];
+        return randomCell;
+    };
+    function play() {
+        alert('AI is going to play now');
+    }
+    // the following functions will be added later once I learn the minimax algorithm. For now, we will only focus on making the AI do some random move.
+    // function mediumPlay(){};
+    // function hardPlay(){};
+    // function unbeatablePlay(){};
+    return {play}
+})();
+
 const gameController = (function() {
     // gets the player name and invokes the appropriate function to create a new player object
     function getNameInput(e) {
@@ -35,6 +59,7 @@ const gameController = (function() {
             DOMController.hideModal();
             players.humanPlayer = players.playerFactory(name, 'X');
             players.AI = players.playerFactory('AI', 'O');
+            players.AI.AIStrategies = AIStrategies;
         }
         else alert('Oops! You haven\'t entered any name.')
     };
@@ -63,10 +88,17 @@ const gameController = (function() {
             console.log('the cell is empty, the game is not over yet, and it\'s the player/s turn.')
             let playerSign = players.humanPlayer.getSign();
             gameBoard.setCell(cellIndex,playerSign);
+            players.humanPlayer.setPlayedCell(cellIndex);
             DOMController.setDOMCell(e.target, playerSign);
+            gameRules.addOneTurn();
+            if(!gameRules.checkForWinner(players.humanPlayer) && gameBoard.getEmptyCells().length) {
+                players.AI.AIStrategies.play();
+            }
+            
         }
         else { 
-            console.log('This cell cannot be refilled')
+            console.log('Oops, you can\'t play now!');
+            return;
         }
     };
 
@@ -74,10 +106,11 @@ const gameController = (function() {
         alert('restart');
         for(let i = 0; i < 9; i++) {
             if(gameBoard.getCell(i)) {
-                gameBoard.setCell(undefined);
+                gameBoard.setCell(i, undefined);
             }
         }
         DOMController.restartGame();
+        gameRules.restartNumOfTurns();
     }
 
     function changeDifficultyLevel(e) {
@@ -92,7 +125,6 @@ const gameController = (function() {
 // This object is for manipulating the DOM only. However, it does communicate with other object to make necessary changes that are not in the DOM.
 const DOMController = (function() {
 
-    const htmlGame = document.querySelector('main');
     const gameCells = document.querySelectorAll('#board button');
     const restartButton = document.getElementById('restart');
     const difficultyLevel = document.getElementById('difficulty');
@@ -155,11 +187,18 @@ let players = (function() {
         function setName(newName) {
             this.name = newName;
         };
-        return {getSign, setSign, getName, setName}
+        function setPlayedCell(cell) {
+            this.cells.push(cell);
+        }
+        function getPlayedCells() {
+            return this.cells;
+        }
+        return {getSign, setSign, getName, setName, setPlayedCell, getPlayedCells}
     })();
 // player factory function
     function playerFactory(name, sign) {
-        let player = Object.assign(Object.create(myPrototype), {name, sign});
+        let cells = [];
+        let player = Object.assign(Object.create(myPrototype), {name, sign, cells});
         return player;
     }
 
@@ -172,14 +211,48 @@ let gameRules = (function() {
     let numOfTurns = 0;
     let isGameOver = false;
     let winner = null;
+    let winningCombinations = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]];
+    // This function hasn't been tested yet.
+    function checkForWinner(player) {
+        // cells occupied by the player.
+        let occupiedCells = player.getPlayedCells();
+        let i = 0;
+        let isAWinner = false;
+        while(!isAWinner && i < winningCombinations.length) {
+            let combination = winningCombinations[i]
+            isAWinning = combination.every((value) => {
+                occupiedCells.includes(value);
+            })
+            i++;
+        }
+        console.log(isAWinner);
+        return isAWinner;
+    }
+    function addOneTurn() {
+        numOfTurns++;
+        console.log('Turn number ' + numOfTurns);
+    }
+    function getNumOfTurns() {
+        return numOfTurns;
+    }
+
+    function restartNumOfTurns() {
+        numOfTurns = 0;
+        console.log('Num of turns = 0')
+    }
     function whoseTurn() {
-        if(numOfTurns % 2) {
+        if(isGameOver) {
+            console.log('Game Over!');
+            return null;
+        }
+        else if(numOfTurns % 2) {
             return players.AI.getName();
         }
         else return players.humanPlayer.getName();
     }
-    return {whoseTurn, isGameOver, numOfTurns}
-}) ()
+    return {whoseTurn, isGameOver, addOneTurn, getNumOfTurns, restartNumOfTurns, checkForWinner}
+}) ();
+
 
 
 
